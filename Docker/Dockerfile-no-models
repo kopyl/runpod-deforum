@@ -1,0 +1,34 @@
+FROM python:3.10-slim AS final
+FROM r8.im/deforum-art/deforum-stable-diffusion@sha256:1a98303504c7d866d2b198bae0b03237eab82edc1491a5306895d12b0021d6f6 as build
+
+
+COPY huggingface /root/.cache/huggingface
+
+RUN pip install boto3==1.26.143
+RUN pip install cog==0.7.2
+RUN pip install runpod==0.9.10
+
+
+FROM final
+
+
+COPY --from=build /src/configs /src/configs
+COPY --from=build /src/helpers /src/helpers
+COPY --from=build /src/script /src/script
+COPY --from=build /src/cog.yaml /src/cog.yaml
+COPY --from=build /src/models /src/models
+COPY --from=build /src/settings /src/settings
+COPY --from=build /usr /usr
+COPY --from=build /root /root
+COPY huggingface /root/.cache/huggingface
+
+
+COPY src src
+COPY predict_custom.py predict.py
+COPY handler.py handler.py
+ADD start.sh start.sh
+RUN chmod +x start.sh
+
+WORKDIR /src
+
+CMD ["./start.sh"]

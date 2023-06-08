@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./Docker-raw/deforum-stable-diffusion-main"
+    ]
+}
